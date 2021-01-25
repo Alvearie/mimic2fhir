@@ -15,8 +15,10 @@ limitations under the License.
 /***********************************************************************/
 package de.uzl.itcr.mimic2fhir.model;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Location;
+import java.util.Arrays;
+
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Location;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 
@@ -66,23 +68,23 @@ public class MWard {
 		switch(careUnit) {
 			case "NORMAL":
 			case "NWARD":	//Neonatal ward
-				cc.addCoding().setCode("HU").setSystem("http://hl7.org/fhir/v3/RoleCode").setDisplay("Hospital unit");
+				cc.addCoding().setCode("HU").setSystem("http://hl7.org/fhir/v4/RoleCode").setDisplay("Hospital unit");
 				break;
 			case "CCU": //Coronary care unit
-				cc.addCoding().setCode("CCU").setSystem("http://hl7.org/fhir/v3/RoleCode").setDisplay("Coronary care unit");
+				cc.addCoding().setCode("CCU").setSystem("http://hl7.org/fhir/v4/RoleCode").setDisplay("Coronary care unit");
 				break;
 			case "CSRU": 	//Cardiac surgery recovery unit
 			case "MICU": 	//Medical intensive care unit
 			case "SICU":	//Surgical intensive care unit
 			case "TSICU":	//Trauma/surgical intensive care unit
-				cc.addCoding().setCode("ICU").setSystem("http://hl7.org/fhir/v3/RoleCode").setDisplay("Intensive care unit");
+				cc.addCoding().setCode("ICU").setSystem("http://hl7.org/fhir/v4/RoleCode").setDisplay("Intensive care unit");
 				break;
 			case "NICU": 	//Neonatal intensive care unit
-				cc.addCoding().setCode("PEDNICU").setSystem("http://hl7.org/fhir/v3/RoleCode").setDisplay("Pediatric neonatal intensive care unit");
+				cc.addCoding().setCode("PEDNICU").setSystem("http://hl7.org/fhir/v4/RoleCode").setDisplay("Pediatric neonatal intensive care unit");
 				break;
 
 		}
-		loc.setType(cc);
+		loc.setType(Arrays.asList(cc));
 				
 		loc.setId(IdDt.newRandomUuid());
 		

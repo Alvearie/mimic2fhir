@@ -20,7 +20,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.uzl.itcr.mimic2fhir.model.MAdmission;
 import de.uzl.itcr.mimic2fhir.model.MCaregiver;
@@ -91,14 +93,13 @@ public class ConnectDB {
 	public int getNumberOfPatients() {
 		String query = "SELECT COUNT(*) FROM PATIENTS";
 		int count = 0;
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			 while (rs.next()) {
-					count = rs.getInt(1);
-			 }
-		} catch (SQLException e) {
+		
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -120,18 +121,33 @@ public class ConnectDB {
 	 * @return filled MPatient-Object
 	 */
 	public MPatient getPatientByRowId(int rowId) {
-		String query = "SELECT * FROM PATIENTS WHERE ROW_ID = " + rowId;
+		String query = "SELECT * FROM PATIENTS WHERE ROW_ID = " + rowId + ";";
 		return getOnePatientFromDb(query);
 	}
 	
+    public List<Integer> getPatientRowIds() {
+        List<Integer> rowIds = new ArrayList<>();
+        String query = "SELECT ROW_ID FROM PATIENTS";
+        
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Integer rowId = rs.getInt(1);
+                rowIds.add(rowId);
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return rowIds;
+    }
+
+	
 	private MPatient getOnePatientFromDb(String query) {
-		
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			
-			if (rs.next()) {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+
+        	if (rs.next()) {
 					MPatient mPat = new MPatient();
 					//SUBJECT_ID
 					mPat.setPatientSubjectId(rs.getString(2));
@@ -156,11 +172,10 @@ public class ConnectDB {
 	
 	private void getPatientAdmissions(MPatient pat) {
 		String query = "SELECT * FROM ADMISSIONS WHERE SUBJECT_ID = " + pat.getPatientSubjectId();
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			
+		
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+	
 			while (rs.next()) {
 					MAdmission mAdm = new MAdmission();
 					mAdm.setAdmissionId(rs.getString(3));
@@ -215,11 +230,9 @@ public class ConnectDB {
 					    "INNER JOIN D_ITEMS D ON C.ITEMID = D.ITEMID " + 
 						"WHERE C.HADM_ID= " + admission.getAdmissionId();
 		
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+	
 			 while (rs.next()) { 
 				 
 				 //Value = null ausschließen -> kein Wert
@@ -262,10 +275,9 @@ public class ConnectDB {
 						"FROM LABEVENTS L " +
 					    "INNER JOIN D_LABITEMS D ON L.ITEMID = D.ITEMID " + 
 						"WHERE L.SUBJECT_ID = " + patientSubjId + " AND L.HADM_ID= " + admission.getAdmissionId();
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
 
 			 while (rs.next()) { 
 				 //Value = null ausschließen -> kein Wert
@@ -318,12 +330,10 @@ public class ConnectDB {
 		String query =  "SELECT * " +
 						"FROM NOTEEVENTS " +
 						"WHERE SUBJECT_ID = " + patientSubjId + " AND HADM_ID= " + admission.getAdmissionId();
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			 while (rs.next()) { 
-				 
+		
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) { 
 				 boolean isError = rs.getString(10) == "1";
 				 
 				 MNoteevent event = new MNoteevent();
@@ -362,11 +372,10 @@ public class ConnectDB {
 					"   INNER JOIN d_icd_diagnoses i ON d.icd9_code = i.icd9_code" + 
 					"   WHERE d.subject_id = " + patId + "AND d.hadm_id = " + adm.getAdmissionId() + 
 					"   ORDER BY d.seq_num";
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+        	while (rs.next()) {
 					MDiagnose mDiag = new MDiagnose();
 					mDiag.setIcd9Code(rs.getString(5));
 					mDiag.setShortTitle(rs.getString(8));
@@ -387,11 +396,10 @@ public class ConnectDB {
 					"   INNER JOIN d_icd_procedures i ON p.icd9_code = i.icd9_code" + 
 					"   WHERE p.subject_id = " + patId + "AND p.hadm_id = " + adm.getAdmissionId() + 
 					"   ORDER BY p.seq_num";
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
+        
+		try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+        	while (rs.next()) {
 					MProcedure mProc = new MProcedure();
 					mProc.setIcd9Code(rs.getString(5));
 					mProc.setShortTitle(rs.getString(8));
@@ -415,11 +423,9 @@ public class ConnectDB {
 		String query = "SELECT * FROM caregivers";
 		HashMap<Integer,MCaregiver> caregivers = new HashMap<Integer,MCaregiver>();
 		
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+        	while (rs.next()) {
 					MCaregiver cg = new MCaregiver();
 					cg.setCaregiverId(rs.getInt(2));
 					cg.setLabel(rs.getString(3));
@@ -439,10 +445,9 @@ public class ConnectDB {
 		String query =  "SELECT * " +
 						"FROM PRESCRIPTIONS " +
 						"WHERE SUBJECT_ID = " + patientSubjId + " AND HADM_ID= " + admission.getAdmissionId();
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
+		
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        	ResultSet rs = statement.executeQuery();
 			 while (rs.next()) { 			 
 				 MPrescription pres = new MPrescription();
 				 
@@ -480,11 +485,10 @@ public class ConnectDB {
 		String query =  "SELECT * " +
 						"FROM TRANSFERS " +
 						"WHERE SUBJECT_ID = " + patientSubjId + " AND HADM_ID= " + admission.getAdmissionId();
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			int index = 0;
+		
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+        	int index = 0;
 			 while (rs.next()) {
 				 index++;
 				 MTransfer t = new MTransfer();
@@ -521,11 +525,9 @@ public class ConnectDB {
 		String query = "SELECT DISTINCT curr_wardid, curr_careunit FROM transfers";
 		HashMap<Integer,MWard> wards = new HashMap<Integer,MWard>();
 		
-		PreparedStatement statement;
-		try {
-			statement = connection.prepareStatement(query);
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+        	while (rs.next()) {
 					MWard ward = new MWard();
 					ward.setWardId(rs.getInt(1));
 					ward.setCareUnit(rs.getString(2));

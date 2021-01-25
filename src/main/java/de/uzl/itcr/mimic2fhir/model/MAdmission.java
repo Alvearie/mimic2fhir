@@ -19,18 +19,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Condition;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterHospitalizationComponent;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
-import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationAdministration;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Procedure;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Encounter.EncounterHospitalizationComponent;
+import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationStatement;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 
@@ -220,17 +220,17 @@ public class MAdmission {
 			//AdmissionType -> Class
 			//‘ELECTIVE’, ‘URGENT’, ‘NEWBORN’ or ‘EMERGENCY’
 			switch(admissionType) {
-				case "ELECTIVCE":
-					enc.setClass_(new Coding().setCode("IMP").setSystem("http://hl7.org/fhir/v3/ActCode").setDisplay("inpatient encounter"));
+				case "ELECTIVE":
+					enc.setClass_(new Coding().setCode("IMP").setSystem("http://hl7.org/fhir/v4/ActCode").setDisplay("inpatient encounter"));
 					break;
 				case "URGENT":
-					enc.setClass_(new Coding().setCode("ACUTE").setSystem("http://hl7.org/fhir/v3/ActCode").setDisplay("inpatient acute"));
+					enc.setClass_(new Coding().setCode("ACUTE").setSystem("http://hl7.org/fhir/v4/ActCode").setDisplay("inpatient acute"));
 					break;
 				case "EMERGENCY":
-					enc.setClass_(new Coding().setCode("EMER").setSystem("http://hl7.org/fhir/v3/ActCode").setDisplay("emergency"));
+					enc.setClass_(new Coding().setCode("EMER").setSystem("http://hl7.org/fhir/v4/ActCode").setDisplay("emergency"));
 					break;
 				case "NEWBORN":
-					enc.setClass_(new Coding().setCode("NEWB").setSystem("http://hl7.org/fhir/v3/ActCode").setDisplay("newborn"));
+					enc.setClass_(new Coding().setCode("NEWB").setSystem("http://hl7.org/fhir/v4/ActCode").setDisplay("newborn"));
 					break;
 			}
 			
@@ -398,19 +398,19 @@ public class MAdmission {
 	}
 
 	/**
-	 * Create all FHIR-"MedicationAdministration"s for this encounter
+	 * Create all FHIR-"MedicationStatement"s for this encounter
 	 * @param patId Patient-FHIR-Resource-Id
 	 * @param encId Encounter-FHIR-Resource-Id
-	 * @return List with all MedicationAdministration
+	 * @return List with all MedicationStatement
 	 */
-	public List<MedicationAdministration> createFhirMedAdminsFromMimic(String patId, String encId) {
+	public List<MedicationStatement> createFhirMedicationStatementsFromMimic(String patId, String encId) {
 	
-		List<MedicationAdministration> administrations = new ArrayList<MedicationAdministration>();	
+		List<MedicationStatement> meds = new ArrayList<MedicationStatement>();	
 	
 		int index = 0;
 		for(MPrescription p : this.prescriptions) {			
-			administrations.add(p.getFhirMedAdministration(patId, encId, index++));
+		    meds.add(p.getFhirMedicationStatement(patId, encId, index++));
 		}
-		return administrations;
+		return meds;
 	}
 }
