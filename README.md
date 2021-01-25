@@ -5,7 +5,7 @@ To get access to MIMIC-III DB, you have to complete a privacy course, see https:
 
 ## How to use
 
-There are 2 provided entry points for accessing Mimic2Fhir. The first relies on a message queue for processing and iterates through the entire target Mimic database before completing.  The second is on-demand, and will read one patient from Mimic, provide it as a FHIR bundle, and wait for future requests.  They were kept separate to provide new functionality without impacting the original API for this project.  In the future they may be merged in to a single API.
+There are 2 provided entry points for accessing Mimic2Fhir. The first ([Mimic2Fhir](#api-1-mimic2fhir)) relies on a message queue for processing and iterates through the entire target Mimic database before completing.  The second ([Mimic2Fhir2](#api-2-mimic2fhir2)) is on-demand, and will read one patient from Mimic, provide it as a FHIR bundle, and wait for future requests.  They were kept separate to provide new functionality without impacting the original API for this project.  In the future they may be merged in to a single API.
 
 In either case, the first step in using this API is to configure access to the target Mimic database, like this:
 
